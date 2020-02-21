@@ -1,0 +1,10 @@
+---
+- hosts: kubernetes-worker-nodes
+  vars_files:
+  - env_variables
+  tasks:
+  - name: Joining worker nodes with kubernetes master
+    shell: |
+       cat /tmp/join_token  | egrep -i 'kubeadm join|discovery' | xargs | xargs > /tmp/tokenfile
+  - name: Joining worker nodes
+    command: sh /tmp/tokenfile

@@ -1,0 +1,32 @@
+---
+- hosts: kubernetes-master-nodes
+  vars_files:
+  - env_variables 
+  tasks:
+  - name: Pulling images required for setting up a Kubernetes cluster
+    shell: kubeadm config images pull
+
+  - name: Initializing Kubernetes cluster
+    shell: kubeadm init 
+    register: output
+
+  - name: Storing Logs and Generated token for future purpose.
+    local_action: copy content={{ output.stdout }} dest={{ token_file }}
+
+  - name: Copying required files
+    shell: |
+       mkdir -p /root/.kube
+       sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
+       sudo chown $(id -u):$(id -g) /root/.kube/config
+
+  - name: Install Network Add-on
+    shell: |
+       export kubever=$(kubectl version | base64 | tr -d '\n')
+       kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$kubever"
+- hosts: kubernetes-worker-nodes
+  tasks:
+  - name: Copying token to worker nodes
+    copy: 
+      src: join_token
+      dest: /tmp/join_token
+

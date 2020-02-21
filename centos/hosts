@@ -1,0 +1,4 @@
+[kubernetes-master-nodes]
+localhost
+[kubernetes-worker-nodes]
+cavmlx-rdk-hd-02
